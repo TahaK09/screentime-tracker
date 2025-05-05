@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Website Time Tracker",
+  "version": "1.0",
+  "description": "Track time spent on each website and send data to MongoDB.",
+  "permissions": ["tabs", "storage", "idle", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icons.png",
+      "32": "icons/icons.png",
+      "48": "icons/icons.png",
+      "128": "icons/icons.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icons.png",
+    "32": "icons/icons.png",
+    "48": "icons/icons.png",
+    "128": "icons/icons.png"
+  }
+}

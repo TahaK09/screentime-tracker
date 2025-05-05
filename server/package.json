@@ -1,0 +1,20 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server for time tracking extension",
+  "main": "index.mjs",
+  "scripts": {
+    "start:dev": "nodemon ./index.mjs"
+  },
+  "author": "Taha Firoz Khan",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.1",
+    "nodemon": "^3.1.10",
+    "server": "file:"
+  },
+  "type": "module"
+}
