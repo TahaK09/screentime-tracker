@@ -3,7 +3,14 @@
   "name": "Website Time Tracker",
   "version": "1.0",
   "description": "Track time spent on each website and send data to MongoDB.",
-  "permissions": ["tabs", "storage", "idle", "activeTab", "scripting"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "idle",
+    "activeTab",
+    "scripting",
+    "webNavigation"
+  ],
   "background": {
     "service_worker": "background.js"
   },
