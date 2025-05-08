@@ -8,42 +8,60 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     };
   }
 });
-
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   const tabData = activeTabs[tabId];
-  if (tabData) {
-    const session = {
-      url: tabData.url,
-      openTime: tabData.openTime,
-      closeTime: new Date().toISOString(),
-    };
-    const d = new Date();
-    let day = d.getDay();
-    const diffInMs = new Date() - Date.parse(tabData.openTime);
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    console.log(diffInMinutes);
+  if (!tabData) return;
 
-    try {
-        await fetch("http://localhost:5000/api/save-url", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: tabData.url,
-            timeWeekly: { [day]: diffInMinutes }, // Using bracket notation for dynamic key
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to save to DB:", error);
-      }
+  const match = tabData.url.match(
+    /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/
+  );
+  if (!match) return;
 
-    delete activeTabs[tabId];
+  const currentURL = match[1];
+  const openTime = new Date(tabData.openTime);
+  const closeTime = new Date();
+  const diffInMinutes = Math.floor((closeTime - openTime) / (1000 * 60));
+  const today = new Date().toISOString().split("T")[0];
+
+  try {
+    const res = await fetch("http://localhost:5000/api/check-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: currentURL }),
+    });
+
+    const urlExist = await res.json();
+
+    if (urlExist.success) {
+      const currentData = urlExist.data.screentime;
+      const currentTime = currentData?.[today] || 0;
+      const updatedTime = currentTime + diffInMinutes;
+
+      await fetch("http://localhost:5000/api/update-screentime", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: currentURL,
+          screentime: { [today]: updatedTime },
+        }),
+      });
+    } else {
+      await fetch("http://localhost:5000/api/save-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: currentURL,
+          screentime: { [today]: diffInMinutes },
+        }),
+      });
+    }
+  } catch (error) {
+    console.error("Error tracking screen time:", error);
   }
+
+  delete activeTabs[tabId];
 });
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Extension installed");
-});
-
-chrome.tabs.onRemoved.addListener((tabId) => {
-  console.log("Tab closed:", tabId);
 });
