@@ -12,6 +12,7 @@
   "dependencies": {
     "@heroui/react": "^2.7.8",
     "@tailwindcss/vite": "^4.1.5",
+    "axios": "^1.9.0",
     "client": "file:",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const screenTimeData = [
   { day: "Mon", low: 0.5, medium: 2, high: 2.5 },
@@ -11,6 +12,33 @@ const screenTimeData = [
 ];
 
 export default function ScreenTimeChart() {
+  const [screenTime, setScreenTime] = useState([]);
+
+  useEffect(() => {
+    const fetchScreenTime = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/urls");
+
+        if (res && res.data) {
+          const today = new Date().toISOString().split("T")[0];
+
+          const transformedData = res.data.map((item) => ({
+            name: item.url,
+            value: item.screentime?.[today] || 0,
+          }));
+
+          setScreenTime(transformedData);
+        }
+      } catch (err) {
+        console.error("Error fetching screen time:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScreenTime();
+  }, []);
+
   return (
     <div className="bg-gray-900 text-white p-8 rounded-2xl w-full max-w-md">
       <div className="flex justify-between items-center mb-4">
@@ -24,7 +52,7 @@ export default function ScreenTimeChart() {
         </select>
       </div>
       <div className="flex items-end justify-between h-40 mt-4">
-        {screenTimeData.map((day, i) => {
+        {screenTime.map((day, i) => {
           const totalHeight = 160;
           const lowHeight = (day.low / 7) * totalHeight;
           const mediumHeight = (day.medium / 7) * totalHeight;

@@ -10,8 +10,8 @@ function App() {
     <>
       <div className="w-screen h-screen flex gap-10 justify-center items-center bg-gray-800">
         <Component />
-        <ScreenTimeChart />
-        <YouTubeSummary />
+        {/* <ScreenTimeChart /> */}
+        {/* <YouTubeSummary /> */}
       </div>
     </>
   );

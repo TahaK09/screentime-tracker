@@ -1,33 +1,71 @@
-import React, { useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Tooltip } from "recharts";
+import React, { useState, useEffect } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import axios from "axios";
 
-const chartData = [
-  { name: "Facebook", value: 400 },
-  { name: "Youtube", value: 300 },
-  { name: "Instagram", value: 300 },
-  { name: "Whatsapp Web", value: 200 },
-];
-
-// Custom fixed color palette (match the image)
+// Fixed color palette
 const COLORS = ["#F59E0B", "#FCD34D", "#34D399", "#60A5FA"];
 
 const PieChartCard = () => {
+  const [screenTime, setScreenTime] = useState([]);
   const [optionState, setOptionState] = useState("Per Day");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchScreenTime = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/urls");
+
+        if (res && res.data) {
+          const today = new Date().toISOString().split("T")[0];
+
+          const transformedData = res.data.map((item) => ({
+            name: item.url,
+            value: item.screentime?.[today] || 0,
+          }));
+
+          setScreenTime(transformedData);
+        }
+      } catch (err) {
+        console.error("Error fetching screen time:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScreenTime();
+  }, []);
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const { name, value } = payload[0];
+      return (
+        <div className="bg-gray-800 text-white p-2 rounded shadow-lg">
+          <p className="text-sm font-semibold">{name}</p>
+          <p className="text-xs text-yellow-300">
+            {value >= 60
+              ? `${Math.floor(value / 60)}h ${value % 60}min`
+              : `${value} mins`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const showOptions = (e) => {
     e.preventDefault();
-
     setOptionState(e.currentTarget.getAttribute("data-value"));
   };
 
   return (
     <div className="dark bg-gray-900 text-white rounded-2xl shadow-xl p-5 w-full max-w-md">
       <div className="flex flex-row justify-between">
-        <h1 className="text-lg font-semibold mb-2">Top Products</h1>
+        <h1 className="text-lg font-semibold mb-2">Screen Time</h1>
 
         <div className="flex flex-row gap-3">
+          {/* Dropdown for Per Day / Per Week */}
           <div className="relative group">
-            <button className="flex flex-row justify-between items-center mb-5 px-2 bg-gray-700  border-gray-200 rounded-lg w-24 h-7 text-sm">
+            <button className="flex flex-row justify-between items-center mb-5 px-2 bg-gray-700 border-gray-200 rounded-lg w-24 h-7 text-sm">
               {optionState}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -37,29 +75,31 @@ const PieChartCard = () => {
               >
                 <path
                   fill="currentColor"
-                  fill-rule="evenodd"
+                  fillRule="evenodd"
                   d="m8 10.207l3.854-3.853l-.707-.708L8 8.793L4.854 5.646l-.708.708z"
-                  clip-rule="evenodd"
+                  clipRule="evenodd"
                 />
               </svg>
             </button>
             <ul className="hidden group-hover:block absolute top-10 right-0 bg-gray-700 shadow border border-gray-200 py-2.5 w-30 rounded-md text-sm z-40">
               <li
                 data-value="Per Day"
-                onClick={(e) => showOptions(e)}
+                onClick={showOptions}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
               >
                 Per Day
               </li>
               <li
                 data-value="Per Week"
-                onClick={(e) => showOptions(e)}
+                onClick={showOptions}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
               >
                 Per Week
               </li>
             </ul>
           </div>
+
+          {/* Options button */}
           <div className="relative group">
             <button className="text-sm text-gray-400 mb-5 hover:bg-gray-600 p-1 rounded-full">
               <svg
@@ -76,13 +116,13 @@ const PieChartCard = () => {
             </button>
             <ul className="hidden group-hover:block absolute top-10 right-0 bg-gray-700 shadow border border-gray-200 py-2.5 w-30 rounded-md text-sm z-40">
               <li
-                onClick={() => console.log("this was clicked")}
+                onClick={() => console.log("My Orders clicked")}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
               >
                 My Orders
               </li>
               <li
-                onClick={() => console.log("logout was clicked")}
+                onClick={() => console.log("Logout clicked")}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
               >
                 Logout
@@ -92,43 +132,49 @@ const PieChartCard = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        {/* Pie Chart */}
-        <ResponsiveContainer width={200} height={200}>
-          <PieChart>
-            <Pie
-              animationDuration={1000}
-              animationEasing="ease"
-              data={chartData}
-              dataKey="value"
-              innerRadius="68%"
-              nameKey="name"
-              paddingAngle={-20}
-              strokeWidth={0}
-            >
-              {chartData.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
+      {/* Loading or Chart */}
+      {loading ? (
+        <div className="text-center text-gray-400 py-10">Loading...</div>
+      ) : (
+        <div className="flex items-center justify-between">
+          {/* Pie Chart */}
+          <ResponsiveContainer width={200} height={200}>
+            <PieChart>
+              <Pie
+                animationDuration={1000}
+                animationEasing="ease"
+                data={screenTime}
+                dataKey="value"
+                innerRadius="68%"
+                nameKey="name"
+                paddingAngle={-20}
+                strokeWidth={0}
+              >
+                {screenTime.map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
 
-        {/* Labels */}
-        <div className="space-y-4 ml-4">
-          {chartData.map((entry, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
-              />
-              <span className="text-sm text-gray-300">{entry.name}</span>
-            </div>
-          ))}
+          {/* Legend */}
+          <div className="space-y-4 ml-4">
+            {screenTime.map((entry, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                />
+                <span className="text-sm text-gray-300">{entry.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

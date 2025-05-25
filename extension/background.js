@@ -22,7 +22,9 @@ chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   const closeTime = new Date();
   const diffInMinutes = Math.floor((closeTime - openTime) / (1000 * 60));
   const today = new Date().toISOString().split("T")[0];
-
+  console.log(openTime);
+  console.log(closeTime);
+  console.log(diffInMinutes);
   try {
     const res = await fetch("http://localhost:5000/api/check-url", {
       method: "POST",
