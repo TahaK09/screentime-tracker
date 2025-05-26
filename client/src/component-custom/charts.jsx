@@ -3,7 +3,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import axios from "axios";
 
 // Fixed color palette
-const COLORS = ["#F59E0B", "#FCD34D", "#34D399", "#60A5FA"];
+const COLORS = ["#F59E0B", "#FCD34D", "#34D399", "#60A5FA", "#0000FF"];
+const today = new Date().toISOString().split("T")[0];
 
 const PieChartCard = () => {
   const [screenTime, setScreenTime] = useState([]);
@@ -18,10 +19,19 @@ const PieChartCard = () => {
         if (res && res.data) {
           const today = new Date().toISOString().split("T")[0];
 
-          const transformedData = res.data.map((item) => ({
-            name: item.url,
-            value: item.screentime?.[today] || 0,
-          }));
+          const transformedData =
+            optionState === "Per Day"
+              ? res.data.map((item) => ({
+                  name: item.url,
+                  value: item.screentime?.[today] || 0,
+                }))
+              : res.data.map((item) => {
+                  const total = Object.values(item.screentime || {}).reduce(
+                    (sum, min) => sum + min,
+                    0
+                  );
+                  return { name: item.url, value: total };
+                });
 
           setScreenTime(transformedData);
         }
@@ -33,7 +43,7 @@ const PieChartCard = () => {
     };
 
     fetchScreenTime();
-  }, []);
+  }, [optionState]);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -56,6 +66,8 @@ const PieChartCard = () => {
     e.preventDefault();
     setOptionState(e.currentTarget.getAttribute("data-value"));
   };
+
+  const st_notzero = screenTime.filter((item) => item.value !== 0);
 
   return (
     <div className="dark bg-gray-900 text-white rounded-2xl shadow-xl p-5 w-full max-w-md">
@@ -143,31 +155,34 @@ const PieChartCard = () => {
               <Pie
                 animationDuration={1000}
                 animationEasing="ease"
-                data={screenTime}
+                data={st_notzero}
                 dataKey="value"
                 innerRadius="68%"
                 nameKey="name"
                 paddingAngle={-20}
                 strokeWidth={0}
               >
-                {screenTime.map((_, index) => (
+                {st_notzero.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
                   />
                 ))}
               </Pie>
+
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
 
           {/* Legend */}
           <div className="space-y-4 ml-4">
-            {screenTime.map((entry, index) => (
-              <div key={index} className="flex items-center gap-2">
+            {st_notzero.map((entry, index) => (
+              <div key={entry.name} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  style={{
+                    backgroundColor: COLORS[index % COLORS.length],
+                  }}
                 />
                 <span className="text-sm text-gray-300">{entry.name}</span>
               </div>

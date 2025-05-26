@@ -4,30 +4,131 @@
 <head>
     <title>Website Time Tracker</title>
     <style>
-        body {
-            min-width: 200px;
-            min-height: 100px;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-        button {
+        body {
+            width: 350px;
+            height: 500px;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: #F59E0B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .about {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #CBD5E1;
+            line-height: 1.6;
+        }
+
+        .card {
+            margin-top: 20px;
+            background-color: #1E293B;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #FBBF24;
+        }
+
+        .time-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #34D399;
+        }
+
+        .footer {
+            margin-top: auto;
+        }
+
+        .btn {
+            margin-top: 20px;
+            background-color: #2563EB;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #1D4ED8;
+        }
+
+        .note {
             margin-top: 10px;
-            padding: 5px 10px;
+            font-size: 12px;
+            color: #94A3B8;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
-    <h2>Tracker Active </h2>
+    <!-- Header with Logo -->
+    <div class="header">
+        <div class="logo">TF</div>
+        <div class="title">ScreenTime Tracker</div>
+    </div>
 
-    <ul id="local-url"></ul>
-    <div id="logs"></div>
-    <button id="view-stats">View Stats (Coming Soon)</button>
+    <!-- About Section -->
+    <div class="about">
+        Track how much time you spend on different websites each day. Stay aware and productive!
+    </div>
+
+    <!-- ScreenTime Info -->
+    <div class="card">
+        <h3>Today's Screen Time</h3>
+        <div class="time-value" id="timeValue">0h 0min</div>
+    </div>
+
+    <!-- Footer with CTA -->
+    <div class="footer">
+        <button class="btn" id="viewDashboardBtn">View Full Dashboard</button>
+        <div class="note">Made by Taha F. Khan</div>
+    </div>
+
     <script src="popup.js"></script>
 </body>
 
